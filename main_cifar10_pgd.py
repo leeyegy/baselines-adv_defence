@@ -42,6 +42,7 @@ import sys
 from torch.autograd import Variable
 sys.path.append("../../")
 from networks import *
+from defence import defencer
 
 
 torch.multiprocessing.set_sharing_strategy('file_system')
@@ -148,6 +149,10 @@ if __name__ == '__main__':
     # test
     parser.add_argument('--test_samples', default=100, type=int)
 
+    # defence
+    parser.add_argument('--defence_method', default="FeatureSqueezing", type=str)
+
+
     args = parser.parse_args()
     print_setting(args)
 
@@ -241,7 +246,7 @@ if __name__ == '__main__':
                 advcorrect_nodefence += pred.eq(target.view_as(pred)).sum().item()
 
                 # defence
-                defence_data = ddid_batch(advdata,(args.sigma/255)**2)
+                defence_data = torch.from_numpy(defencer(adv_data=advdata.cpu().numpy(),defence_method=args.defence_method, clip_values=[0,1], bit_depth=8, apply_fit=False, apply_predict=True)).to(device)
                 with torch.no_grad():
                     output = model(defence_data.float())
                 pred = output.max(1, keepdim=True)[1]
