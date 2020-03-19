@@ -123,7 +123,7 @@ if __name__ == '__main__':
     parser.add_argument('--targeted', action='store_true',help='if to minimize')
 
 
-    parser.add_argument('--epsilon', type = float,default=8/255, help='if pd_block is used')
+    parser.add_argument('--epsilon', type = int,default=8, help='if pd_block is used')
 
     #model save
     parser.add_argument('--des', default='targeted', type=str, help='for model saving and loading ')
@@ -183,7 +183,7 @@ if __name__ == '__main__':
         from advertorch.attacks import LinfPGDAttack
         if args.attack_method == "PGD":
             adversary = LinfPGDAttack(
-                model, loss_fn=nn.CrossEntropyLoss(reduction="sum"), eps=args.epsilon,
+                model, loss_fn=nn.CrossEntropyLoss(reduction="sum"), eps=args.epsilon/255,
                 nb_iter=20, eps_iter=0.01, rand_init=True, clip_min=0.0, clip_max=1.0,
                 targeted=args.targeted)
         else:
@@ -245,7 +245,7 @@ if __name__ == '__main__':
                 advcorrect_nodefence += pred.eq(target.view_as(pred)).sum().item()
 
                 # defence
-                defence_data = defencer(adv_data=advdata.cpu().numpy(),defence_method=args.defence_method, clip_values=(0,1), bit_depth=8, apply_fit=False, apply_predict=True)
+                defence_data = defencer(adv_data=advdata.cpu().numpy(),defence_method=args.defence_method, clip_values=(0,1), eps=args.epsilon,bit_depth=8, apply_fit=False, apply_predict=True)
                 defence_data = torch.from_numpy(defence_data).to(device)
 
                 with torch.no_grad():
