@@ -245,7 +245,9 @@ if __name__ == '__main__':
                 advcorrect_nodefence += pred.eq(target.view_as(pred)).sum().item()
 
                 # defence
-                defence_data = torch.from_numpy(defencer(adv_data=advdata.cpu().numpy(),defence_method=args.defence_method, clip_values=[0,1], bit_depth=8, apply_fit=False, apply_predict=True)).to(device)
+                defence_data = defencer(adv_data=advdata.cpu().numpy(),defence_method=args.defence_method, clip_values=(0,1), bit_depth=8, apply_fit=False, apply_predict=True)
+                defence_data = torch.from_numpy(defence_data).to(device)
+
                 with torch.no_grad():
                     output = model(defence_data.float())
                 pred = output.max(1, keepdim=True)[1]

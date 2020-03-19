@@ -20,7 +20,7 @@ def defencer(adv_data, defence_method, clip_values, bit_depth=8, apply_fit=False
         pass
 
     # step2. defend
-    return defence(adv_data)
+    return defence(adv_data)[0]
 
 
 
