@@ -1,5 +1,5 @@
 import  numpy as np
-import art.defences.preprocessor import FeatureSqueezing
+from art.defences.preprocessor import FeatureSqueezing
 def defencer(adv_data, defence_method, clip_values, bit_depth=8, apply_fit=False, apply_predict=True):
     '''
     :param adv_data: np.ndarray | [N C H W ]
