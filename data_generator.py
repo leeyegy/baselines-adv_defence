@@ -44,6 +44,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
+from config import args
 
 patch_size, stride = 40, 10
 aug_times = 1
@@ -71,35 +72,6 @@ def getNetwork(args):
     return net, file_name
 
 def _get_test_adv(attack_method,epsilon):
-    # define parameter
-    parser = argparse.ArgumentParser(description='Train MNIST')
-    parser.add_argument('--seed', default=0, type=int)
-    parser.add_argument('--mode', default="adv", help="cln | adv")
-    parser.add_argument('--sigma', default=75, type=int, help='noise level')
-    parser.add_argument('--train_batch_size', default=50, type=int)
-    parser.add_argument('--test_batch_size', default=1000, type=int)
-    parser.add_argument('--log_interval', default=200, type=int)
-    parser.add_argument('--result_dir', default='results', type=str, help='directory of test dataset')
-    parser.add_argument('--monitor', default=False, type=bool, help='if monitor the training process')
-    parser.add_argument('--start_save', default=90, type=int,
-                        help='the threshold epoch which will start to save imgs data using in testing')
-
-    # attack
-    parser.add_argument("--attack_method", default="PGD", type=str,
-                        choices=['FGSM', 'PGD', 'Momentum', 'STA'])
-
-    parser.add_argument('--epsilon', type=float, default=8 / 255, help='if pd_block is used')
-
-    parser.add_argument('--dataset', default='cifar10', type=str, help='dataset = [cifar10/MNIST]')
-
-    # net
-    parser.add_argument('--net_type', default='wide-resnet', type=str, help='model')
-    parser.add_argument('--depth', default=28, type=int, help='depth of model')
-    parser.add_argument('--widen_factor', default=10, type=int, help='width of model')
-    parser.add_argument('--dropout', default=0.3, type=float, help='dropout_rate')
-    parser.add_argument('--num_classes', default=10, type=int)
-    args = parser.parse_args()
-
     torch.manual_seed(args.seed)
     use_cuda = torch.cuda.is_available()
     device = torch.device("cuda" if use_cuda else "cpu")
@@ -125,16 +97,16 @@ def _get_test_adv(attack_method,epsilon):
     if attack_method == "PGD":
         adversary = LinfPGDAttack(
             model, loss_fn=nn.CrossEntropyLoss(reduction="sum"), eps=epsilon,
-            nb_iter=40, eps_iter=0.01, rand_init=True, clip_min=0.0, clip_max=1.0,
+            nb_iter=20, eps_iter=0.01, rand_init=True, clip_min=0.0, clip_max=1.0,
             targeted=False)
     elif attack_method == "FGSM":
         adversary = GradientSignAttack(
             model, loss_fn=nn.CrossEntropyLoss(reduction="sum"),
-            clip_min=0.0, clip_max=1.0, eps=0.007, targeted=False)  # 先测试一下不含扰动范围限制的，FGSM的eps代表的是一般的eps_iter
+            clip_min=0.0, clip_max=1.0, eps=epsilon, targeted=False)  # 先测试一下不含扰动范围限制的，FGSM的eps代表的是一般的eps_iter
     elif attack_method == "Momentum":
         adversary = MomentumIterativeAttack(
             model, loss_fn=nn.CrossEntropyLoss(reduction="sum"), eps=epsilon,
-            nb_iter=40, decay_factor=1.0, eps_iter=1.0, clip_min=0.0, clip_max=1.0,
+            nb_iter=20, decay_factor=1.0, eps_iter=1.0, clip_min=0.0, clip_max=1.0,
             targeted=False, ord=np.inf)
     elif attack_method == "STA":
         adversary = SpatialTransformAttack(

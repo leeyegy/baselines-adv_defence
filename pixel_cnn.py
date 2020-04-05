@@ -64,6 +64,17 @@ class Pixel_cnn_net(nn.Module):
 #     MaskedConv2d('B', fm, fm, 7, 1, 3, bias=False), nn.BatchNorm2d(fm), nn.ReLU(True),
 #     nn.Conv2d(fm, 256, 1))
 # print (net)
+def findLastCheckpoint():
+    import glob,re,os
+    file_list = glob.glob(os.path.join("models","pixel_cnn_epoch_*.pth"))
+    epoch = []
+    if file_list:
+        for file in file_list:
+            result = re.findall(".*pixel_cnn_epoch_(.*).pth",file)
+            epoch.append(int(result[0]))
+        return max(epoch)
+    return -1
+
 if __name__ == '__main__':
     net = Pixel_cnn_net().cuda()
 
@@ -76,9 +87,13 @@ if __name__ == '__main__':
     sample = torch.Tensor(144, 1, 28, 28).cuda()
     optimizer = optim.Adam(net.parameters())
 
+    init_epoch = findLastCheckpoint()
+    if init_epoch >=0:
+        print("restored from epoch:{}".format(init_epoch+1))
+        net = torch.load("models/pixel_cnn_epoch_"+str(init_epoch)+".pth")
 
 
-    for epoch in range(30):
+    for epoch in range(init_epoch+1,30):
         # train
         err_tr = []
         cuda.synchronize()
