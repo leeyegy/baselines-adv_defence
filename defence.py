@@ -1,5 +1,5 @@
 import  numpy as np
-from art.defences.preprocessor import FeatureSqueezing,PixelDefend,ThermometerEncoding,TotalVarMin
+from art.defences.preprocessor import FeatureSqueezing,PixelDefend,ThermometerEncoding,TotalVarMin,JpegCompression,SpatialSmoothing
 from art.classifiers import Classifier
 from art.classifiers import PyTorchClassifier
 import torch.nn as nn
@@ -57,11 +57,16 @@ def defencer(adv_data, defence_method, clip_values, eps=16,bit_depth=8, apply_fi
         defence = ThermometerEncoding(clip_values=clip_values)
     elif defence_method == "TotalVarMin":
         defence = TotalVarMin(clip_values=clip_values)
+    elif defence_method == "JPEGCompression":
+        defence = JpegCompression(clip_values=clip_values)
+    elif defence_method == "SpatialSmoothing":
+        defence = SpatialSmoothing(clip_values=clip_values)
 
-
+    adv_data = np.transpose(adv_data,[0,3,2,1])
     # step2. defend
     print(adv_data.shape)
     res = defence(adv_data)[0]
+    res = np.transpose(res,[0,3,2,1])
     print(res.shape)
     return res
 

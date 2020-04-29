@@ -76,9 +76,10 @@ if __name__ == '__main__':
 
     # load net
     save_dir = "checkpoint"
-    file_name = 'wide-resnet-' + str(args.depth) + 'x' + str(args.widen_factor) + '.t7'
+    # file_name = 'wide-resnet-' + str(args.depth) + 'x' + str(args.widen_factor) + '.t7'
+    file_name = "cifar10_vgg16_model_299.pth"
     model = torch.load(os.path.join(save_dir, file_name))
-    model = model['net']
+    # model = model['net']
     model = model.to(device)
     optimizer = optim.Adam(model.parameters(), lr=1e-4)
 

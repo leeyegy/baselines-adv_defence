@@ -3,7 +3,7 @@ parser = argparse.ArgumentParser(description='Train MNIST')
 parser.add_argument('--seed', default=0, type=int)
 # attack
 parser.add_argument("--attack_method", default="PGD", type=str,
-                    choices=['FGSM', 'PGD', 'Momentum', 'STA', "DeepFool", "CW","none"])
+                    choices=['FGSM', 'PGD', 'Momentum', 'STA', "DeepFool", "CW","NONE"])
 parser.add_argument('--epsilon', type=float, default=0.00784, help='if adopt pixelcnn, epsilon should use int type')
 parser.add_argument('--dataset', default='cifar10', type=str, help='dataset = [cifar10/MNIST]')
 
@@ -16,5 +16,5 @@ parser.add_argument('--num_classes', default=10, type=int)
 
 
 # defence
-parser.add_argument('--defence_method', default="FeatureSqueezing", type=str, choices=['FeatureSqueezing',"TotalVarMin"])
+parser.add_argument('--defence_method', default="FeatureSqueezing", type=str, choices=['FeatureSqueezing',"TotalVarMin","SpatialSmoothing","JPEGCompression"])
 args = parser.parse_args()

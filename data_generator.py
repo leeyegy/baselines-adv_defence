@@ -155,7 +155,10 @@ def get_test_adv_loader(attack_method,epsilon):
     if os.path.exists("data/test_adv_"+str(attack_method)+"_"+str(epsilon)+".h5"):
         h5_store = h5py.File("data/test_adv_"+str(attack_method)+"_"+str(epsilon)+".h5", 'r')
         test_data = h5_store['data'][:] # 通过切片得到np数组
-        test_true_target=h5_store['true_target'][:]
+        try:
+            test_true_target=h5_store['true_target'][:]
+        except:
+            test_true_target=h5_store['target'][:]
         h5_store.close()
     else:
 
