@@ -1,8 +1,10 @@
-for epsilon in 0.00784 0.03137 0.06275 
+for epsilon in 0.0
 do
-for attack in DeepFool CW
+for attack in NONE
 do  
-	python main_tiny_imagenet.py  --epsilon $epsilon --attack_method $attack  --defence_method TotalVarMin | tee ./log/tiny_imagenet_$attack\_$epsilon\_TotalVarMin.txt
+for defence in JPEGCompression SpatialSmoothing
+do
+	python main_tiny_imagenet.py  --epsilon $epsilon --attack_method $attack  --defence_method $defence | tee ./log/tiny_imagenet_$attack\_$epsilon\_$defence.txt
 done
 done  
-
+done

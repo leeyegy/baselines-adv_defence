@@ -44,6 +44,7 @@ from networks import *
 from defence import defencer
 from pixel_cnn import *#没有这行代码的话，torch.load 来加载pixel_cnn会报错
 from config import  args
+from time import *
 
 torch.multiprocessing.set_sharing_strategy('file_system')
 
@@ -79,11 +80,10 @@ if __name__ == '__main__':
     file_name = 'wide-resnet-' + str(args.depth) + 'x' + str(args.widen_factor) + '.t7'
     # file_name = "cifar10_vgg16_model_299.pth"
     model = torch.load(os.path.join(save_dir, file_name))
-    # model = model['net']
+    model = model['net']
     model = model.to(device)
     optimizer = optim.Adam(model.parameters(), lr=1e-4)
 
-    time_stamp = time.strftime('%Y-%m-%d-%H-%M-%S',time.localtime(time.time()))
     nb_epoch = 1
     for epoch in range(nb_epoch):
         model.eval()
@@ -102,7 +102,11 @@ if __name__ == '__main__':
             clncorrect_nodefence += pred.eq(target.view_as(pred)).sum().item()
 
             # defence
+            begin_time = time()
             defence_data = defencer(adv_data=clndata.cpu().numpy(),defence_method=args.defence_method, clip_values=(0,1), eps=args.epsilon,bit_depth=8, apply_fit=False, apply_predict=True)
+            end_time = time()
+            run_time = end_time - begin_time
+            print('该循环程序运行时间：', run_time)
             defence_data = torch.from_numpy(defence_data).to(device)
 
             with torch.no_grad():

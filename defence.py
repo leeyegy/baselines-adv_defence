@@ -64,10 +64,10 @@ def defencer(adv_data, defence_method, clip_values, eps=16,bit_depth=8, apply_fi
 
     adv_data = np.transpose(adv_data,[0,3,2,1])
     # step2. defend
-    print(adv_data.shape)
+    # print(adv_data.shape)
     res = defence(adv_data)[0]
     res = np.transpose(res,[0,3,2,1])
-    print(res.shape)
+    # print(res.shape)
     return res
 
     # if defence_method=="FeatureSqueezing":
