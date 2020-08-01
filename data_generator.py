@@ -289,7 +289,7 @@ def get_handled_cifar10_train_loader(batch_size, num_workers, shuffle=True):
     return DataLoader(dataset=train_dataset, num_workers=num_workers, drop_last=True, batch_size=batch_size,
                   shuffle=shuffle)
 
-def get_handled_cifar10_test_loader(batch_size, num_workers, shuffle=True,nb_samples=100):
+def get_handled_cifar10_test_loader(batch_size, num_workers, shuffle=True,nb_samples=10000):
     file_path = "data/test_" + str(nb_samples)+".h5"
     if nb_samples >10000:
         print("dataset has only 10000 samples~ ")
