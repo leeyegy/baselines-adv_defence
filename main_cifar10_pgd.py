@@ -1,5 +1,3 @@
-
-
 from __future__ import print_function
 
 import os
@@ -47,11 +45,6 @@ from config import  args
 from time import *
 
 torch.multiprocessing.set_sharing_strategy('file_system')
-
-
-
-
-
 
 #print args
 def print_setting(args):
