@@ -7,6 +7,7 @@ from art.classifiers import Classifier
 from art.classifiers import PyTorchClassifier
 import torch.nn as nn
 from data_generator import  get_handled_cifar10_test_loader
+from config import args
 
 def _JpegCompression(data):
     '''
@@ -47,7 +48,7 @@ def main(args):
     adversary = BPDAattack(model, defence, device,
                                 epsilon=args.epsilon,
                                 learning_rate=0.01,
-                                max_iterations=args.max_iterations,test=test)
+                                max_iterations=args.max_iterations)
 
     # model test
     model.eval()
@@ -70,15 +71,4 @@ def main(args):
                   100. * clncorrect_nodefence / len(testLoader.dataset)))
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--seed', default=0, type=int)
-    parser.add_argument("--epsilon",type=float,default=8/255)
-
-    # defence
-    parser.add_argument("--defence_method",default="JPEGCompression",type =str,choices=['JPEGCompression',"SpatialSmoothing"])
-
-    # BPDA ATTACK
-    parser.add_argument("--max_iterations",default=10,type =int)
-    args = parser.parse_args()
-    os.environ['CUDA_VISIBLE_DEVICES'] = '0,1,2'
     main(args)

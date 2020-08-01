@@ -14,6 +14,8 @@ parser.add_argument('--widen_factor', default=10, type=int, help='width of model
 parser.add_argument('--dropout', default=0.3, type=float, help='dropout_rate')
 parser.add_argument('--num_classes', default=10, type=int)
 
+# BPDA ATTACK
+parser.add_argument("--max_iterations", default=10, type=int)
 
 # defence
 parser.add_argument('--defence_method', default="FeatureSqueezing", type=str, choices=['FeatureSqueezing',"TotalVarMin","SpatialSmoothing","JPEGCompression"])
