@@ -161,7 +161,7 @@ if __name__ == '__main__':
           '  acc: {}/{} ({:.0f}% )\n'.format(
                correct_defence, len(test_loader.dataset),
               100. * correct_defence / len(test_loader.dataset)))
-    
+
     # clean test
     test_loader = get_handled_cifar10_test_loader(batch_size=50, num_workers=2, shuffle=False,nb_samples=10000)
     correct = 0
@@ -173,7 +173,7 @@ if __name__ == '__main__':
         pred = output.max(1, keepdim=True)[1]
         correct += pred.eq(target.view_as(pred)).sum().item()
 
-        print('\ncln Test set: '
-              ' cln acc: {}/{} ({:.0f}%) \n'.format(
-                   correct, len(test_loader.dataset),
-                  100. * correct / len(test_loader.dataset)))
+    print('\ncln Test set: '
+          ' cln acc: {}/{} ({:.0f}%) \n'.format(
+               correct, len(test_loader.dataset),
+              100. * correct / len(test_loader.dataset)))
