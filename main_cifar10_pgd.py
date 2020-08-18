@@ -87,7 +87,6 @@ def ssim_and_save(com_data,cln_data):
     for index in range(com_data.shape[0]):
         com_img = com_data[index]
         cln_img = cln_data[index]
-        print(com_img.shape)
         psnr = psnr2(com_img,cln_img)
         psnr_list.append(psnr)
         grayA = cv2.cvtColor(com_img, cv2.COLOR_BGR2GRAY)
@@ -114,7 +113,6 @@ if __name__ == '__main__':
     # data
     test_loader = get_test_adv_loader(attack_method=args.attack_method,epsilon=args.epsilon)
 
-
     # load net
     save_dir = "checkpoint"
     file_name = 'wide-resnet-' + str(args.depth) + 'x' + str(args.widen_factor) + '.t7'
@@ -124,50 +122,58 @@ if __name__ == '__main__':
     model = model.to(device)
     optimizer = optim.Adam(model.parameters(), lr=1e-4)
 
-    nb_epoch = 1
-    for epoch in range(nb_epoch):
-        model.eval()
-        clncorrect_nodefence = 0
-        clncorrect_defence = 0
-        correct_defence = 0
+    model.eval()
+    clncorrect_nodefence = 0
+    clncorrect_defence = 0
+    correct_defence = 0
+    for clndata, target in test_loader:
+        clndata, target = clndata.to(device), target.to(device)
 
-        sum_fosc_loss = 0
-        for clndata, target in test_loader:
-            clndata, target = clndata.to(device), target.to(device)
+        # # clean data without defence
+        with torch.no_grad():
+            output = model(clndata.float())
+        pred = output.max(1, keepdim=True)[1]
+        clncorrect_nodefence += pred.eq(target.view_as(pred)).sum().item()
 
-            # # clean data without defence
-            with torch.no_grad():
-                output = model(clndata.float())
-            pred = output.max(1, keepdim=True)[1]
-            clncorrect_nodefence += pred.eq(target.view_as(pred)).sum().item()
+        # defence
+        begin_time = time()
+        defence_data = defencer(adv_data=clndata.cpu().numpy(),defence_method=args.defence_method, clip_values=(0,1), eps=args.epsilon,bit_depth=8, apply_fit=False, apply_predict=True)
+        end_time = time()
+        run_time = end_time - begin_time
+        print('该循环程序运行时间：', run_time)
+        if args.test_ssim:
+            print("测试ssim值")
+            ssim_and_save(defence_data,clndata.cpu().numpy())
+            break
+        defence_data = torch.from_numpy(defence_data).to(device)
 
-            # defence
-            begin_time = time()
-            defence_data = defencer(adv_data=clndata.cpu().numpy(),defence_method=args.defence_method, clip_values=(0,1), eps=args.epsilon,bit_depth=8, apply_fit=False, apply_predict=True)
-            end_time = time()
-            run_time = end_time - begin_time
-            print('该循环程序运行时间：', run_time)
-            if args.test_ssim:
-                print("测试ssim值")
-                ssim_and_save(defence_data,clndata.cpu().numpy())
-                break
-            defence_data = torch.from_numpy(defence_data).to(device)
+        with torch.no_grad():
+            output = model(defence_data.float())
+        pred = output.max(1, keepdim=True)[1]
+        correct_defence += pred.eq(target.view_as(pred)).sum().item()
 
-            with torch.no_grad():
-                output = model(defence_data.float())
-            pred = output.max(1, keepdim=True)[1]
-            correct_defence += pred.eq(target.view_as(pred)).sum().item()
+    print('\nadv Test set: '
+          ' adv acc: {}/{} ({:.0f}%) \n'.format(
+               clncorrect_nodefence, len(test_loader.dataset),
+              100. * clncorrect_nodefence / len(test_loader.dataset)))
 
+    print(' defence test: '
+          '  acc: {}/{} ({:.0f}% )\n'.format(
+               correct_defence, len(test_loader.dataset),
+              100. * correct_defence / len(test_loader.dataset)))
+    
+    # clean test
+    test_loader = get_handled_cifar10_test_loader(batch_size=50, num_workers=2, shuffle=False,nb_samples=10000)
+    correct = 0
+    for clndata, target in test_loader:
+        clndata, target = clndata.to(device), target.to(device)
+        # # clean data without defence
+        with torch.no_grad():
+            output = model(clndata.float())
+        pred = output.max(1, keepdim=True)[1]
+        correct += pred.eq(target.view_as(pred)).sum().item()
 
-        print('\nadv Test set: '
-              ' adv acc: {}/{} ({:.0f}%) \n'.format(
-                   clncorrect_nodefence, len(test_loader.dataset),
-                  100. * clncorrect_nodefence / len(test_loader.dataset)))
-
-
-
-        print(' defence test: '
-              '  acc: {}/{} ({:.0f}% )\n'.format(
-                   correct_defence, len(test_loader.dataset),
-                  100. * correct_defence / len(test_loader.dataset)))
-
+        print('\ncln Test set: '
+              ' cln acc: {}/{} ({:.0f}%) \n'.format(
+                   correct, len(test_loader.dataset),
+                  100. * correct / len(test_loader.dataset)))
