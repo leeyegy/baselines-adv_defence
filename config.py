@@ -19,4 +19,7 @@ parser.add_argument("--max_iterations", default=10, type=int)
 
 # defence
 parser.add_argument('--defence_method', default="FeatureSqueezing", type=str, choices=['FeatureSqueezing',"TotalVarMin","SpatialSmoothing","JPEGCompression"])
+
+# SSIM
+parser.add_argument("--test_ssim",default=False,action="store_true")
 args = parser.parse_args()
